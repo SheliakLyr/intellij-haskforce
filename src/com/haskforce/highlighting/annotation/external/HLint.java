@@ -7,6 +7,7 @@ import com.haskforce.cabal.lang.psi.CabalFile;
 import com.haskforce.cabal.query.BuildInfo;
 import com.haskforce.cabal.query.BuildInfoUtil;
 import com.haskforce.cabal.query.CabalQuery;
+import com.haskforce.features.intentions.ApplyHLint;
 import com.haskforce.features.intentions.IgnoreHLint;
 import com.haskforce.highlighting.annotation.HaskellAnnotationHolder;
 import com.haskforce.highlighting.annotation.HaskellProblem;
@@ -270,7 +271,11 @@ public class HLint {
 
         protected void createAnnotation(@NotNull HaskellAnnotationHolder holder, int start, int end, @NotNull String message) {
             Annotation ann = holder.createWarningAnnotation(TextRange.create(start, end), message);
-            if (ann != null) ann.registerFix(new IgnoreHLint(hint));
+            if (ann != null) {
+                if (to != null && !to.isEmpty())
+                    ann.registerFix(new ApplyHLint(hint, to, start, end));
+                ann.registerFix(new IgnoreHLint(hint));
+            }
         }
 
         @Override
